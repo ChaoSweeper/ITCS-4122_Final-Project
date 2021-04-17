@@ -45,13 +45,30 @@ if st.sidebar.checkbox("Gender Representation"):
     )
     st.plotly_chart(fig2)
 
-if st.sidebar.checkbox(""):
-    df1 = df.groupby(["region", "Event"])["Medal"].agg("count")
-    df = pd.DataFrame(df1)
-    df = df.pivot_table(index="Event", columns="region", values="Medal", aggfunc=sum)
+    # input_col, pie_col = st.beta_columns(2)
+    # df = df.reset_index()
+    # df.columns = ["Sex", "region"]
+    # df = df.head(10)
+    # fig3 = px.pie(df, values="region", names="Sex")
+    # pie_col.write(fig3)
 
-    op1 = st.selectbox("First County", df.columns)
-    op2 = st.selectbox("Second County", df.columns)
+if st.sidebar.checkbox(""):
+    fig = go.Figure(
+        data=go.Table(
+            header=dict(
+                values=list(df[["region", "Event", "Medal"]].columns),
+                align="center",
+                font=dict(color="black", size=12),
+            ),
+            cells=dict(
+                values=[df.region, df.Event, df.Medal],
+                align="center",
+                font=dict(color="white", size=11),
+                fill_color="black",
+            ),
+        )
+    )
+    st.plotly_chart(fig)
 
 if st.sidebar.checkbox("Participants: Yearly Total"):
     df["Games"] = df["Games"].fillna("0")
