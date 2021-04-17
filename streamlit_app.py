@@ -1,3 +1,4 @@
+from pandas.core.frame import DataFrame
 import streamlit as st
 import seaborn as sns
 import pandas as pd
@@ -28,8 +29,8 @@ st.markdown(
 )
 
 if st.sidebar.checkbox("Gender Representation"):
-    male = df[df["Sex"] == "M"]["ID"].count()
-    female = df[df["Sex"] == "F"]["ID"].count()
+    male = df[df["Sex"] == "M"]["ID"].agg("count")
+    female = df[df["Sex"] == "F"]["ID"].agg("count")
 
     fig1 = px.histogram(
         df, x="Year", color="Sex", title="Gender Representation 1896-2016"
@@ -44,6 +45,61 @@ if st.sidebar.checkbox("Gender Representation"):
     )
     st.plotly_chart(fig2)
 
+if st.sidebar.checkbox(""):
+    df1 = df.groupby(["region", "Event"])["Medal"].agg("count")
+    df = pd.DataFrame(df1)
+    df = df.pivot_table(index="Event", columns="region", values="Medal", aggfunc=sum)
+
+    op1 = st.selectbox("First County", df.columns)
+    op2 = st.selectbox("Second County", df.columns)
+
+if st.sidebar.checkbox("Participants: Yearly Total"):
+    df["Games"] = df["Games"].fillna("0")
+    df = pd.DataFrame(df)
+    games = df["Games"].value_counts()
+
+    trace = go.Bar(
+        x=games.index,
+        y=games.values,
+        marker=dict(color=games.values, colorscale="Plotly3", showscale=True),
+    )
+    layout = go.Layout(
+        title="Athlete Participantion 1896-2016",
+        yaxis=dict(title="Total Participants", zeroline=False, range=[1, 15000]),
+    )
+    data = [trace]
+    fig = go.Figure(data=data, layout=layout)
+    fig.update_xaxes(categoryorder="category ascending")
+    fig.update_layout(
+        autosize=False,
+        width=1100,
+        height=800,
+    )
+    st.plotly_chart(fig)
+
+if st.sidebar.checkbox("Participants: Country Total"):
+    df["region"] = df["region"].fillna("0")
+    df = pd.DataFrame(df)
+    region = df["region"].value_counts()
+
+    trace = go.Bar(
+        x=region.index,
+        y=region.values,
+        marker=dict(color=region.values, colorscale="Plotly3", showscale=True),
+    )
+    layout = go.Layout(
+        title="Country Participantion 1896-2016",
+        yaxis=dict(title="Countries Total", zeroline=False, range=[1, 15000]),
+    )
+    data = [trace]
+    fig = go.Figure(data=data, layout=layout)
+    fig.update_xaxes(categoryorder="category ascending")
+    fig.update_layout(
+        autosize=True,
+        width=1100,
+        height=800,
+    )
+    st.plotly_chart(fig)
 
 if st.sidebar.checkbox("Medals Won: Country"):
     df_medal = df.groupby(["region", "Medal"])["ID"].agg("count").dropna()
