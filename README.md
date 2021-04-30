@@ -1,6 +1,16 @@
-# ITCS-4122_Final-Project
+# ITCS-4122 Final Project
 
+---
+## Team Members:
+Rohit Alavala
 
+James Cowell
+
+Saiphani Jasthi
+
+Akki Patel
+
+---
 # Demo
 Launch the web app:
 
