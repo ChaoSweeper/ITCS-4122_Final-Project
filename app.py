@@ -1,11 +1,14 @@
-from pandas.core.frame import DataFrame
+import pandas as pd
 import streamlit as st
 import seaborn as sns
-import pandas as pd
 import plotly.express as px
 import plotly.graph_objs as go
 
 
+st.cache()
+
+# import the dateset and format it for
+# use through this app
 def load_data():
     df_data = pd.read_csv("Data/athlete_events.csv")
     df_regions = pd.read_csv("Data/noc_regions.csv")
@@ -28,6 +31,46 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
+# Create a title for the sidebar
+st.sidebar.title("Menu")
+
+# Area to display key information about the dataset
+if st.sidebar.checkbox("Data Information"):
+    st.header("Description")
+    st.subheader("Context")
+    st.write(
+        "This dataset is a historical look at the Olympic Games from 1896 to 2016. "
+        "This dataset was scraped from www.sports-reference.com by Kaggle user rgriffin. "
+        "They made this dataset publicly available to everyone under a Public Domain license."
+    )
+    st.subheader("Content")
+    st.write("This dataset has the following features: ")
+    features_table = [
+        "ID",
+        "Name",
+        "Sex",
+        "Age",
+        "height",
+        "Weight",
+        "Team",
+        "NOC",
+        "Games",
+        "Year",
+        "Season",
+        "City",
+        "Sport",
+        "Event",
+        "Medal",
+        "Region",
+        "Notes",
+    ]
+    st.write(features_table)
+    st.subheader("Raw Data")
+    raw = df.head(5)
+    st.write(raw)
+
+# Create the option to display charts that show the stats
+# for gender representation for the last 120 years
 if st.sidebar.checkbox("Gender Representation"):
     male = df[df["Sex"] == "M"]["ID"].agg("count")
     female = df[df["Sex"] == "F"]["ID"].agg("count")
@@ -45,31 +88,8 @@ if st.sidebar.checkbox("Gender Representation"):
     )
     st.plotly_chart(fig2)
 
-    # input_col, pie_col = st.beta_columns(2)
-    # df = df.reset_index()
-    # df.columns = ["Sex", "region"]
-    # df = df.head(10)
-    # fig3 = px.pie(df, values="region", names="Sex")
-    # pie_col.write(fig3)
-
-if st.sidebar.checkbox(""):
-    fig = go.Figure(
-        data=go.Table(
-            header=dict(
-                values=list(df[["region", "Event", "Medal"]].columns),
-                align="center",
-                font=dict(color="black", size=12),
-            ),
-            cells=dict(
-                values=[df.region, df.Event, df.Medal],
-                align="center",
-                font=dict(color="white", size=11),
-                fill_color="black",
-            ),
-        )
-    )
-    st.plotly_chart(fig)
-
+# Create the option to display information about the
+# yearly total of participants
 if st.sidebar.checkbox("Participants: Yearly Total"):
     df["Games"] = df["Games"].fillna("0")
     df = pd.DataFrame(df)
@@ -82,7 +102,7 @@ if st.sidebar.checkbox("Participants: Yearly Total"):
     )
     layout = go.Layout(
         title="Athlete Participantion 1896-2016",
-        yaxis=dict(title="Total Participants", zeroline=False, range=[1, 15000]),
+        yaxis=dict(title="Total Participants", zeroline=False, range=[1, 14000]),
     )
     data = [trace]
     fig = go.Figure(data=data, layout=layout)
@@ -94,6 +114,8 @@ if st.sidebar.checkbox("Participants: Yearly Total"):
     )
     st.plotly_chart(fig)
 
+# Create the option to display information about the
+# contry of orgion of participants
 if st.sidebar.checkbox("Participants: Country Total"):
     df["region"] = df["region"].fillna("0")
     df = pd.DataFrame(df)
@@ -118,6 +140,8 @@ if st.sidebar.checkbox("Participants: Country Total"):
     )
     st.plotly_chart(fig)
 
+# Create the option to display information about the
+# total of medals won by country
 if st.sidebar.checkbox("Medals Won: Country"):
     df_medal = df.groupby(["region", "Medal"])["ID"].agg("count").dropna()
     df = pd.DataFrame(df_medal).reset_index()
@@ -154,6 +178,8 @@ if st.sidebar.checkbox("Medals Won: Country"):
     draw_map(silver, "Countries that Won Silver Medals", "Greys")
     draw_map(bronze, "Countries that Won Bronze Medals", "turbid")
 
+# Create the option to display information about the
+# total of medals won by event
 if st.sidebar.checkbox("Medals Won: Events"):
     df_events = df.groupby(["Sport", "Medal"])["ID"].agg("count").dropna()
     df = pd.DataFrame(df_events).reset_index()
@@ -206,7 +232,7 @@ if st.sidebar.checkbox("Medals Won: Events"):
         yaxis=dict(title="Total Medals"),
         hovermode="closest",
         barmode="stack",
-        showlegend=False,
+        showlegend=True,
         width=1100,
         height=600,
     )
