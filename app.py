@@ -3,7 +3,7 @@ import streamlit as st
 import seaborn as sns
 import plotly.express as px
 import plotly.graph_objs as go
-
+from pycaret.regression import *
 
 st.cache()
 
@@ -14,6 +14,11 @@ def load_data():
     df_regions = pd.read_csv("Data/noc_regions.csv")
     df = pd.merge(df_data, df_regions, on="NOC", how="left")
     return df
+
+def predict_cache(test_data):
+    rf_saved = load_model('rf_model2')
+    predictions = predict_model(rf_saved, data = test_data)
+    return predictions['Label']
 
 
 # Load data
@@ -238,3 +243,127 @@ if st.sidebar.checkbox("Medals Won: Events"):
     )
     fig = dict(data=data, layout=layout)
     st.plotly_chart(fig)
+    
+if st.sidebar.checkbox("Predict medal type"):
+    #st.write("1 = Gold, 2 = Silver,  3 = Bronze")
+    st.markdown("""
+    <style>
+    .big-font {
+        font-size:50px !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<p class="big-font">1 = Gold, 2 = Silver,  3 = Bronze</p>', unsafe_allow_html=True)
+    col1, col2 = st.beta_columns(2)
+    
+    col1.header("Individual 1")
+    inp_sex = col1.radio('Sex 1', ('female', 'male'), index=0)
+    inp_age = col1.slider('Age 1', 13, 66, 35, step=1)
+    inp_height = col1.slider('Height 1', 136, 223, step=1)
+    inp_weight = col1.slider('Weight 1', 28, 182, step=1)
+    inp_sport = col1.radio('Sport 1', ('Ice Hockey', 'Gymnastics', 'Alpine Skiing', 'Rowing', 'Football',
+       'Fencing', 'Taekwondo', 'Athletics', 'Canoeing', 'Handball',
+       'Water Polo', 'Wrestling', 'Sailing', 'Cycling', 'Hockey',
+       'Figure Skating', 'Softball', 'Swimming', 'Boxing', 'Basketball',
+       'Nordic Combined', 'Diving', 'Baseball', 'Volleyball',
+       'Speed Skating', 'Cross Country Skiing', 'Bobsleigh',
+       'Modern Pentathlon', 'Curling', 'Judo', 'Rugby Sevens', 'Tennis',
+       'Rhythmic Gymnastics', 'Weightlifting', 'Equestrianism',
+       'Badminton', 'Beach Volleyball', 'Ski Jumping', 'Shooting',
+       'Short Track Speed Skating', 'Biathlon', 'Synchronized Swimming',
+       'Freestyle Skiing', 'Triathlon', 'Luge', 'Table Tennis',
+       'Snowboarding', 'Skeleton', 'Rugby', 'Archery', 'Tug-Of-War',
+       'Trampolining', 'Lacrosse', 'Golf', 'Art Competitions'), index=0)
+    inp_region = col1.radio('Region 1', ('Finland', 'Norway', 'Netherlands', 'Italy', 'Spain', 'Azerbaijan',
+       'Russia', 'Belarus', 'France', 'Cameroon', 'USA', 'Hungary',
+       'Australia', 'Iran', 'Canada', 'Pakistan', 'Uzbekistan',
+       'Tajikistan', 'Japan', 'Ethiopia', 'Germany', 'Sweden', 'Turkey',
+       'Bulgaria', 'Egypt', 'UK', 'Jordan', 'Romania', 'Switzerland',
+       'Puerto Rico', 'Mexico', 'Ghana', 'Morocco', 'New Zealand',
+       'Argentina', 'Cuba', 'Poland', 'Czech Republic', 'Nigeria',
+       'Brazil', 'Lithuania', 'South Africa', 'Indonesia', 'Chile',
+       'Ukraine', 'Greece', 'Uganda', 'Syria', 'Qatar', 'Kuwait',
+       'Individual Olympic Athletes', 'Saudi Arabia',
+       'United Arab Emirates', 'Croatia', 'Armenia', 'Serbia', 'Niger',
+       'India', 'Algeria', 'Austria', 'Trinidad', 'Colombia', 'Botswana',
+       'Tunisia', 'South Korea', 'North Korea', 'China', 'Denmark',
+       'Uruguay', 'Guyana', 'Kazakhstan', 'Georgia', 'Kenya', 'Iceland',
+       'Jamaica', 'Malaysia', 'Slovakia', 'Bahamas', 'Paraguay',
+       'Montenegro', 'Ireland', 'Portugal', 'Guatemala', 'Luxembourg',
+       'Belgium', 'Tanzania', 'Lebanon', 'Kyrgyzstan', 'Venezuela',
+       'Thailand', 'Togo', 'Peru', 'Estonia', 'Slovenia', 'Haiti',
+       'Taiwan', 'Zimbabwe', 'Mongolia', 'Moldova', 'Ivory Coast', 'Fiji',
+       'Senegal', 'Dominican Republic', 'Philippines', 'Latvia',
+       'Namibia', 'Israel', 'Liechtenstein', 'Bermuda', 'Vietnam',
+       'Virgin Islands, US', 'Macedonia', 'Sudan', 'Bahrain', 'Grenada',
+       'Sri Lanka', 'Mauritius', 'Kosovo', 'Cyprus', 'Panama', 'Zambia',
+       'Mozambique', 'Suriname', 'Afghanistan', 'Burundi', 'Gabon',
+       'Ecuador', 'Costa Rica', 'Djibouti', 'Eritrea', 'Barbados',
+       'Tonga'), index=0)
+    
+    col2.header("Individual 2")
+    inp_sex2 = col2.radio('Sex 2', ('female', 'male'), index=0)
+    inp_age2 = col2.slider('Age 2', 13, 66, 35, step=1)
+    inp_height2 = col2.slider('Height 2', 136, 223, step=1)
+    inp_weight2 = col2.slider('Weight 2', 28, 182, step=1)
+    inp_sport2 = col2.radio('Sport 2', ('Ice Hockey', 'Gymnastics', 'Alpine Skiing', 'Rowing', 'Football',
+       'Fencing', 'Taekwondo', 'Athletics', 'Canoeing', 'Handball',
+       'Water Polo', 'Wrestling', 'Sailing', 'Cycling', 'Hockey',
+       'Figure Skating', 'Softball', 'Swimming', 'Boxing', 'Basketball',
+       'Nordic Combined', 'Diving', 'Baseball', 'Volleyball',
+       'Speed Skating', 'Cross Country Skiing', 'Bobsleigh',
+       'Modern Pentathlon', 'Curling', 'Judo', 'Rugby Sevens', 'Tennis',
+       'Rhythmic Gymnastics', 'Weightlifting', 'Equestrianism',
+       'Badminton', 'Beach Volleyball', 'Ski Jumping', 'Shooting',
+       'Short Track Speed Skating', 'Biathlon', 'Synchronized Swimming',
+       'Freestyle Skiing', 'Triathlon', 'Luge', 'Table Tennis',
+       'Snowboarding', 'Skeleton', 'Rugby', 'Archery', 'Tug-Of-War',
+       'Trampolining', 'Lacrosse', 'Golf', 'Art Competitions'), index=0)
+    inp_region2 = col2.radio('Region 2', ('Finland', 'Norway', 'Netherlands', 'Italy', 'Spain', 'Azerbaijan',
+       'Russia', 'Belarus', 'France', 'Cameroon', 'USA', 'Hungary',
+       'Australia', 'Iran', 'Canada', 'Pakistan', 'Uzbekistan',
+       'Tajikistan', 'Japan', 'Ethiopia', 'Germany', 'Sweden', 'Turkey',
+       'Bulgaria', 'Egypt', 'UK', 'Jordan', 'Romania', 'Switzerland',
+       'Puerto Rico', 'Mexico', 'Ghana', 'Morocco', 'New Zealand',
+       'Argentina', 'Cuba', 'Poland', 'Czech Republic', 'Nigeria',
+       'Brazil', 'Lithuania', 'South Africa', 'Indonesia', 'Chile',
+       'Ukraine', 'Greece', 'Uganda', 'Syria', 'Qatar', 'Kuwait',
+       'Individual Olympic Athletes', 'Saudi Arabia',
+       'United Arab Emirates', 'Croatia', 'Armenia', 'Serbia', 'Niger',
+       'India', 'Algeria', 'Austria', 'Trinidad', 'Colombia', 'Botswana',
+       'Tunisia', 'South Korea', 'North Korea', 'China', 'Denmark',
+       'Uruguay', 'Guyana', 'Kazakhstan', 'Georgia', 'Kenya', 'Iceland',
+       'Jamaica', 'Malaysia', 'Slovakia', 'Bahamas', 'Paraguay',
+       'Montenegro', 'Ireland', 'Portugal', 'Guatemala', 'Luxembourg',
+       'Belgium', 'Tanzania', 'Lebanon', 'Kyrgyzstan', 'Venezuela',
+       'Thailand', 'Togo', 'Peru', 'Estonia', 'Slovenia', 'Haiti',
+       'Taiwan', 'Zimbabwe', 'Mongolia', 'Moldova', 'Ivory Coast', 'Fiji',
+       'Senegal', 'Dominican Republic', 'Philippines', 'Latvia',
+       'Namibia', 'Israel', 'Liechtenstein', 'Bermuda', 'Vietnam',
+       'Virgin Islands, US', 'Macedonia', 'Sudan', 'Bahrain', 'Grenada',
+       'Sri Lanka', 'Mauritius', 'Kosovo', 'Cyprus', 'Panama', 'Zambia',
+       'Mozambique', 'Suriname', 'Afghanistan', 'Burundi', 'Gabon',
+       'Ecuador', 'Costa Rica', 'Djibouti', 'Eritrea', 'Barbados',
+       'Tonga'), index=0)
+    
+    test_data = pd.DataFrame({'Sex': [inp_sex], 
+                          'Age': [inp_age], 
+                          'Height': [inp_height], 
+                          'Weight' : [inp_weight], 
+                          'Sport': [inp_sport], 
+                          'region': [inp_region]})
+    
+    test_data2 = pd.DataFrame({'Sex': [inp_sex2], 
+                          'Age': [inp_age2], 
+                          'Height': [inp_height2], 
+                          'Weight' : [inp_weight2], 
+                          'Sport': [inp_sport2], 
+                          'region': [inp_region2]})
+    # Show prediction
+    col1.write('Medal = %0.2f'%predict_cache(test_data)[0])
+    col2.write('Medal = %0.2f'%predict_cache(test_data2)[0])
+              
+    
+
+        
