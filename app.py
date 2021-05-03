@@ -5,9 +5,11 @@ import plotly.express as px
 import plotly.graph_objs as go
 from pycaret.regression import *
 
+st.set_page_config(layout="wide")
 
 # import the dateset and format it for
 # use through this app
+@st.cache
 def load_data():
     df_data = pd.read_csv("Data/athlete_events.csv")
     df_regions = pd.read_csv("Data/noc_regions.csv")
