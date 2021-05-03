@@ -14,4 +14,4 @@ Akki Patel
 # Demo
 Launch the web app:
 
-[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/chaosweeper/itcs-4122_final-project/main/app.py)
+[![Heroku](https://heroku-badge.herokuapp.com/?app=history-of-olympic-games)](https://history-of-olympic-games.herokuapp.com/)
